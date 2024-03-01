@@ -6,6 +6,7 @@ describe("Blockchain{}", ()=> {
     beforeEach(()=> {
         blockchain = new Blockchain();
     })
+
    it("contain `chain` Array instance", ()=> {
         expect(blockchain.chain instanceof Array).toBe(true)
    });
@@ -21,38 +22,40 @@ describe("Blockchain{}", ()=> {
    });
 
    describe("isValidChain()", ()=> {
-     beforeEach(()=> {
-        blockchain.addBlock({data: "one"})
-        blockchain.addBlock({data: "two"})
-        blockchain.addBlock({data: "three"})
-     });
-
      describe("when the chain doesn't start with genesis block", ()=> {
         it("return false", ()=> {
             blockchain.chain[0] = {data:"fake genesis"}
-            expect(Block.isValidation(blockchain.chain)).toEqual(false);
+            expect(Blockchain.isValidChain(blockchain.chain)).toEqual(false);
         })
      });
 
-     describe("when the chain start with genesis block", ()=> {
-        describe("and lastHash references has changed", ()=> {
-            it("return false", ()=> {
-                blockchain.chain[2].lastHash = 'broken-lasthash';
-                expect(Block.isValidation(blockchain.chain)).toEqual(false);
-            });
+     describe('when the chain does start with the genesis block and has multiple blocks', ()=>{
+      
+        beforeEach(()=>{
+          blockchain.addBlock({data:'one'});
+          blockchain.addBlock({data:'two'});
+          blockchain.addBlock({data:'three'});
         });
-        
-        describe("and the chain contains a block with invalid field", ()=> {
-            it("return false", ()=> {
-                expect(Block.isValidation(blockchain.chain)).toEqual(false);
-            })
+  
+        describe('and a lastHash refrenece has changed', ()=>{
+          it('returns false', ()=>{
+            blockchain.chain[2].lastHash = 'broken-lastHash';
+            expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
+          });
         });
-
-        describe("and the chain is valid", ()=> {
-            it("return true", ()=> {
-                expect(Block.isValidation(blockchain.chain)).toEqual(true);
-            })
+  
+        describe('and the chain contains a block with an invalid field', ()=>{
+          it('returns false', ()=>{
+            blockchain.chain[2].data = 'changed-data';
+            expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
+          });
         });
-     });
+  
+        describe('and the chain does not contain any invalid blocks', ()=>{
+          it('returns true', ()=>{
+            expect(Blockchain.isValidChain(blockchain.chain)).toBe(true);
+          });
+        });
+      });
    })
 })
